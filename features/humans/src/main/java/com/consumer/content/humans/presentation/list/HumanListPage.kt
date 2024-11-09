@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.consumer.content.core.common.Container
 import com.consumer.content.core.presentation.views.AppErrorView
+import com.consumer.content.core.presentation.views.AppProgressIndicator
 import com.consumer.content.humans.R
 import com.consumer.content.humans.domain.entities.Human
 import com.consumer.content.humans.presentation.list.views.HumanDataListView
@@ -75,7 +76,7 @@ fun HumanListView(
 
                 Container.Empty -> HumanEmptyView()
 
-                Container.Pending -> {}
+                Container.Pending -> AppProgressIndicator()
 
                 Container.Pure -> {}
             }
