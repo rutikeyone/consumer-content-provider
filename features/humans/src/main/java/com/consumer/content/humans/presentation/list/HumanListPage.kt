@@ -1,43 +1,44 @@
 package com.consumer.content.humans.presentation.list
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.consumer.content.core.common.Container
 import com.consumer.content.core.presentation.views.AppErrorView
-import com.consumer.content.core.presentation.views.AppProgressIndicator
+import com.consumer.content.core.presentation.views.PullToRefreshBox
 import com.consumer.content.humans.R
 import com.consumer.content.humans.domain.entities.Human
+import com.consumer.content.humans.presentation.list.viewmodel.HumanListUiEvent
+import com.consumer.content.humans.presentation.list.viewmodel.HumanListViewModel
 import com.consumer.content.humans.presentation.list.views.HumanDataListView
-import com.contentprovider.humans.presentation.list.views.HumanEmptyView
+import com.consumer.content.humans.presentation.list.views.HumanEmptyView
 
 @Composable
 fun HumanListPage(
     viewModel: HumanListViewModel = hiltViewModel(),
     onClickItem: (Human) -> Unit,
 ) {
-    val uiState = viewModel.humanListState.collectAsStateWithLifecycle(Container.Pure)
+    val uiState = viewModel.humanListFlow.collectAsStateWithLifecycle(Container.Pure)
+    val isRefreshing = viewModel.isRefreshFlow.collectAsStateWithLifecycle(false)
 
     HumanListView(
         uiState = uiState,
+        isRefreshing = isRefreshing,
+        onEvent = { viewModel.onEvent(it) },
         onClickItem = onClickItem,
     )
 }
@@ -46,6 +47,8 @@ fun HumanListPage(
 @Composable
 fun HumanListView(
     uiState: State<Container<List<Human>>>,
+    isRefreshing: State<Boolean>,
+    onEvent: (HumanListUiEvent) -> Unit,
     onClickItem: (Human) -> Unit,
 ) {
     Scaffold(
@@ -61,7 +64,11 @@ fun HumanListView(
             )
         },
     ) { innerPadding ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing.value,
+            onRefresh = {
+                onEvent(HumanListUiEvent.Restart)
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -72,11 +79,13 @@ fun HumanListView(
                     onClickItem = onClickItem,
                 )
 
-                is Container.Error -> AppErrorView()
+                is Container.Error -> AppErrorView(
+                    onTryAgain = { onEvent(HumanListUiEvent.Restart) }
+                )
 
                 Container.Empty -> HumanEmptyView()
 
-                Container.Pending -> AppProgressIndicator()
+                Container.Pending -> {}
 
                 Container.Pure -> {}
             }
@@ -99,8 +108,14 @@ fun HumanListPreview() {
         mutableStateOf(dataContainer)
     }
 
+    val isRefreshing = remember {
+        mutableStateOf(true)
+    }
+
     HumanListView(
         uiState = uiState,
+        onEvent = {},
+        isRefreshing = isRefreshing,
         onClickItem = {},
     )
 }

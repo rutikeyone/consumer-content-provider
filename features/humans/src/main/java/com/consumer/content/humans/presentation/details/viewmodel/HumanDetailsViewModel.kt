@@ -4,15 +4,13 @@ import com.consumer.content.core.common.Container
 import com.consumer.content.core.presentation.BaseViewModel
 import com.consumer.content.humans.domain.entities.Human
 import com.consumer.content.humans.domain.repositories.HumanRepository
+import com.contentprovider.core.presentation.flow.restartableStateIn
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 
 private const val silently = false
 private const val requiredObserver = false
@@ -22,20 +20,24 @@ class HumanDetailsViewModel @AssistedInject constructor(
     private val humanRepository: HumanRepository,
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<HumanDetailsUiState> =
-        MutableStateFlow(HumanDetailsUiState.Pending)
-    val uiState = _uiState.asStateFlow()
+    private val humanDetailsState =
+        humanRepository.observeHuman(silently, id, requiredObserver)
+            .catch { emit(Container.Error(it)) }
+            .restartableStateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                Container.Pending,
+            )
 
-    init {
-        viewModelScope.launch {
-            humanRepository
-                .observeHuman(silently, id, requiredObserver)
-                .catch { _uiState.tryEmit(HumanDetailsUiState.Error(it)) }
-                .onEach {
-                    val state = mapContainerToUiState(it)
-                    _uiState.tryEmit(state)
-                }
-                .collect()
+    val uiState = humanDetailsState.map {
+        return@map mapContainerToUiState(it)
+    }
+
+    val refreshState = humanDetailsState.map { it is Container.Pending }
+
+    fun onEvent(humanDetailUiEvent: HumanDetailsUiEvent) {
+        when(humanDetailUiEvent) {
+            HumanDetailsUiEvent.Restart -> humanDetailsState.restart()
         }
     }
 

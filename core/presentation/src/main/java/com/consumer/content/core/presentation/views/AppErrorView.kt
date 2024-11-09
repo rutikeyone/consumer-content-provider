@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import com.consumer.content.core.presentation.R
 
 @Composable
-fun AppErrorView() {
+fun AppErrorView(
+    onTryAgain: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -25,5 +27,12 @@ fun AppErrorView() {
             stringResource(R.string.error),
             style = MaterialTheme.typography.bodyLarge,
         )
+        ElevatedButton(
+            modifier = Modifier
+                .padding(top = 16.dp),
+            onClick = onTryAgain,
+        ) {
+            Text(stringResource(R.string.try_again))
+        }
     }
 }

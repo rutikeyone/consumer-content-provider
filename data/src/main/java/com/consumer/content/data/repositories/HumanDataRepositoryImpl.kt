@@ -4,7 +4,6 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.ContentObserver
 import android.provider.BaseColumns
-import android.util.Log
 import com.consumer.content.core.common.Container
 import com.consumer.content.data.HumanDataRepository
 import com.consumer.content.data.db.HumanContract
@@ -16,7 +15,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
 import javax.inject.Inject
 
 private const val idSelection = "${BaseColumns._ID} = ?"
@@ -110,17 +108,16 @@ class HumanDataRepositoryImpl @Inject constructor(
     }
 
     override fun observeHumans(silently: Boolean) = callbackFlow {
-        requiredReadAll()
-            .collect { requiredUpdate ->
-                if (requiredUpdate.mustUpdate) {
-                    if (!silently) {
-                        trySend(Container.Pending)
-                    }
-
-                    val data = getAllWithResult()
-                    trySend(data)
+        requiredReadAll().collect { requiredUpdate ->
+            if (requiredUpdate.mustUpdate) {
+                if (!silently) {
+                    trySend(Container.Pending)
                 }
+
+                val data = getAllWithResult()
+                trySend(data)
             }
+        }
     }
 
     override fun observeHuman(
@@ -143,7 +140,6 @@ class HumanDataRepositoryImpl @Inject constructor(
             firstTime = true,
             mustUpdate = true,
         )
-
         trySend(initialRequiredUpdate)
 
         val observer = object : ContentObserver(null) {
@@ -152,7 +148,6 @@ class HumanDataRepositoryImpl @Inject constructor(
                     firstTime = false,
                     mustUpdate = true,
                 )
-
                 trySend(requiredUpdate)
             }
         }
@@ -162,7 +157,6 @@ class HumanDataRepositoryImpl @Inject constructor(
             true,
             observer,
         )
-
 
         awaitClose {
             context.contentResolver.unregisterContentObserver(observer)
