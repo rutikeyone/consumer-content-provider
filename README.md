@@ -5,7 +5,7 @@
 
 The application is built using clean architecture principles and follows a multi-module design approach.
 <br>
-It is part of a client-server architecture, where this mobile application functions as the server.
+It is part of a client-server architecture, where this mobile application functions as the client.
 <br><br>
 The server application can be found here: [https://github.com/rutikeyone/producer-content-provider](https://github.com/rutikeyone/producer-content-provider).
 
