@@ -12,10 +12,10 @@ The server application can be found here: [https://github.com/rutikeyone/produce
 
 ## Technologies used
 * `Kotlin`;
-* `Jetpack Compose`;
+* `Jetpack-Compose`;
 * `Coroutines`;
 * `Clean-Architectures`;
-* `Multi-modularity`;
+* `Multi-Modularity`;
 * `Content-Provider`;
 * `Sqlite`.
 
