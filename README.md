@@ -13,7 +13,9 @@
 * `Sqlite`.
 
 ## Features
-
+* `Get list humans`;
+* `Get human details`.
+  
 ## Architecture
 
 <p align="start">
