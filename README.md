@@ -2,7 +2,8 @@
 ## Consumer-Content-Provider 
 
 ## Description 
-
+A mobile application demonstrating the receipt of data from a custom content provider for the Android operating system.
+<br>
 The application is built using clean architecture principles and follows a multi-module design approach.
 <br>
 It is part of a client-server architecture, where this mobile application functions as the client.
