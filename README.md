@@ -31,6 +31,10 @@
 
 ## Video with an example of the work
 
+<a href="https://youtube.com/shorts/qzlxO_G7ng0?feature=share">
+  <img src="https://github.com/rutikeyone/consumer-content-provider/blob/master/metadata/screenshots/1.png" width="250" />
+</a>
+
 ## Building the Code
 
 * `Clone the repository using HTTP: git clone https://github.com/rutikeyone/producer-content-provider`;
