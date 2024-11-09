@@ -1,5 +1,6 @@
 package com.consumer.content.humans.presentation.details
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,20 +30,13 @@ fun HumanDetailsPage(
     val uiState = viewModel.uiState
         .collectAsStateWithLifecycle(HumanDetailsUiState.Pending)
 
-    val refreshState = viewModel.refreshState
-        .collectAsStateWithLifecycle(false)
-
-    HumanDetailsView(
-        uiState = uiState,
-        refreshState = refreshState,
-    )
+    HumanDetailsView(uiState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HumanDetailsView(
     uiState: State<HumanDetailsUiState>,
-    refreshState: State<Boolean>,
 ) {
     Scaffold(
         topBar = {
@@ -57,10 +51,7 @@ fun HumanDetailsView(
             )
         },
     ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = refreshState.value,
-            onRefresh = {
-            },
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -68,9 +59,7 @@ fun HumanDetailsView(
             when(val state = uiState.value) {
                 is HumanDetailsUiState.Data -> HumanDetailsView(state)
                 HumanDetailsUiState.Empty -> {}
-                is HumanDetailsUiState.Error -> AppErrorView(
-                    onTryAgain = { }
-                )
+                is HumanDetailsUiState.Error -> AppErrorView()
                 HumanDetailsUiState.Pending -> {}
                 HumanDetailsUiState.Pure -> {}
             }

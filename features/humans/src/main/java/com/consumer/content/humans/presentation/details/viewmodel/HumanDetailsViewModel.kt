@@ -4,12 +4,15 @@ import com.consumer.content.core.common.Container
 import com.consumer.content.core.presentation.BaseViewModel
 import com.consumer.content.humans.domain.entities.Human
 import com.consumer.content.humans.domain.repositories.HumanRepository
-import com.contentprovider.core.presentation.flow.restartableStateIn
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 private const val silently = false
 private const val requiredObserver = false
@@ -19,18 +22,22 @@ class HumanDetailsViewModel @AssistedInject constructor(
     private val humanRepository: HumanRepository,
 ) : BaseViewModel() {
 
-    private val humanDetailsFlow =
-        humanRepository.observeHuman(silently, id, requiredObserver).restartableStateIn(
-            viewModelScope,
-            SharingStarted.Lazily,
-            Container.Pending,
-        )
+    private val _uiState: MutableStateFlow<HumanDetailsUiState> =
+        MutableStateFlow(HumanDetailsUiState.Pending)
+    val uiState = _uiState.asStateFlow()
 
-    val uiState = humanDetailsFlow.map {
-        return@map mapContainerToUiState(it)
+    init {
+        viewModelScope.launch {
+            humanRepository
+                .observeHuman(silently, id, requiredObserver)
+                .catch { _uiState.tryEmit(HumanDetailsUiState.Error(it)) }
+                .onEach {
+                    val state = mapContainerToUiState(it)
+                    _uiState.tryEmit(state)
+                }
+                .collect()
+        }
     }
-
-    val refreshState = humanDetailsFlow.map { it is Container.Pending }
 
     private fun mapContainerToUiState(container: Container<Human>): HumanDetailsUiState {
         return when (container) {
@@ -46,10 +53,6 @@ class HumanDetailsViewModel @AssistedInject constructor(
 
             is Container.Error -> HumanDetailsUiState.Error(container.error)
         }
-    }
-
-    private fun restart() {
-        humanDetailsFlow.restart()
     }
 
     @AssistedFactory

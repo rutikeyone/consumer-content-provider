@@ -1,11 +1,11 @@
 package com.consumer.content.humans.presentation.list
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -21,15 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.consumer.content.core.common.Container
 import com.consumer.content.core.presentation.views.AppErrorView
-import com.consumer.content.core.presentation.views.PullToRefreshBox
 import com.consumer.content.humans.R
 import com.consumer.content.humans.domain.entities.Human
-import com.consumer.content.humans.presentation.list.viewmodel.HumanListUiAction
-import com.consumer.content.humans.presentation.list.viewmodel.HumanListUiEvent
-import com.consumer.content.humans.presentation.list.viewmodel.HumanListViewModel
 import com.consumer.content.humans.presentation.list.views.HumanDataListView
 import com.contentprovider.humans.presentation.list.views.HumanEmptyView
 
@@ -38,33 +33,11 @@ fun HumanListPage(
     viewModel: HumanListViewModel = hiltViewModel(),
     onClickItem: (Human) -> Unit,
 ) {
-    val context = LocalContext.current
-
-    val uiState = viewModel.humanListFlow.collectAsStateWithLifecycle(Container.Pure)
-    val uiActionState = viewModel.uiActionFlow.collectAsStateWithLifecycle()
-    val isRefreshing = viewModel.isRefreshFlow.collectAsStateWithLifecycle(false)
-
-    val snackBarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(key1 = uiActionState.value) {
-        val showSnackBarEvent = uiActionState.value?.get()
-
-        showSnackBarEvent?.let {
-            when (it) {
-                is HumanListUiAction.ShowSnackBar -> {
-                    val resource = context.getString(it.value)
-                    snackBarHostState.showSnackbar(resource)
-                }
-            }
-        }
-    }
+    val uiState = viewModel.humanListState.collectAsStateWithLifecycle(Container.Pure)
 
     HumanListView(
         uiState = uiState,
-        isRefreshing = isRefreshing,
-        onEvent = { viewModel.onEvent(it) },
         onClickItem = onClickItem,
-        snackBarHostState = snackBarHostState,
     )
 }
 
@@ -72,13 +45,9 @@ fun HumanListPage(
 @Composable
 fun HumanListView(
     uiState: State<Container<List<Human>>>,
-    isRefreshing: State<Boolean>,
-    onEvent: (HumanListUiEvent) -> Unit,
     onClickItem: (Human) -> Unit,
-    snackBarHostState: SnackbarHostState,
 ) {
     Scaffold(
-        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -91,11 +60,7 @@ fun HumanListView(
             )
         },
     ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = isRefreshing.value,
-            onRefresh = {
-                onEvent(HumanListUiEvent.Restart)
-            },
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -106,9 +71,7 @@ fun HumanListView(
                     onClickItem = onClickItem,
                 )
 
-                is Container.Error -> AppErrorView(
-                    onTryAgain = { onEvent(HumanListUiEvent.Restart) }
-                )
+                is Container.Error -> AppErrorView()
 
                 Container.Empty -> HumanEmptyView()
 
@@ -135,17 +98,8 @@ fun HumanListPreview() {
         mutableStateOf(dataContainer)
     }
 
-    val isRefreshing = remember {
-        mutableStateOf(true)
-    }
-
-    val snackBarHostState = remember { SnackbarHostState() }
-
     HumanListView(
         uiState = uiState,
-        onEvent = {},
-        isRefreshing = isRefreshing,
         onClickItem = {},
-        snackBarHostState = snackBarHostState,
     )
 }

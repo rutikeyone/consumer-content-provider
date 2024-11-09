@@ -84,7 +84,7 @@ sealed class Container<out T> {
         }
     }
 
-    data class Error(val error: Exception) : Container<Nothing>() {
+    data class Error(val error: Throwable) : Container<Nothing>() {
         override suspend fun <R> suspendMap(mapper: (suspend (Nothing) -> R)?): Container<R> {
             return this
         }

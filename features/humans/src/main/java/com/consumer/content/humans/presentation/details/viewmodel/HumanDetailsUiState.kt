@@ -21,26 +21,11 @@ sealed class HumanDetailsUiState {
         val age: String = "",
     ) : HumanDetailsUiState() {
 
-        val validateStatue: Boolean
-            get() {
-                val ageLongOrNull = age.toLongOrNull()
-                val nameDifferent = name != human.name
-                val surnameDifferent = surname != human.surname
-                val ageDifferent = age.toIntOrNull() != human.age
-
-                val hasDifferent =
-                    nameDifferent || surnameDifferent || ageDifferent
-
-                val hasData = name.isNotEmpty() && surname.isNotEmpty() && ageLongOrNull != null
-
-                return hasData && hasDifferent
-            }
-
         override fun getOrNull(): Data {
             return this
         }
 
     }
 
-    data class Error(val exception: Exception) : HumanDetailsUiState()
+    data class Error(val exception: Throwable) : HumanDetailsUiState()
 }
