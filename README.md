@@ -7,7 +7,7 @@ The application is built using clean architecture principles and follows a multi
 <br>
 It is part of a client-server architecture, where this mobile application functions as the server.
 <br><br>
-The server application can be found here: [https://github.com/rutikeyone/consumer-content-provider](https://github.com/rutikeyone/producer-content-provider).
+The server application can be found here: [https://github.com/rutikeyone/producer-content-provider](https://github.com/rutikeyone/producer-content-provider).
 
 ## Technologies used
 * `Kotlin`;
