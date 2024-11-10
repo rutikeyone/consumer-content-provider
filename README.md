@@ -44,7 +44,7 @@ The server application can be found here: [https://github.com/rutikeyone/produce
 
 ## Building the Code
 
-* `Clone the repository using HTTP: git clone https://github.com/rutikeyone/producer-content-provider`;
+* `Clone the repository using HTTP: git clone https://github.com/rutikeyone/consumer-content-provider`;
 * `Open Android Studio/Visual Studio Code`;
 * `Click on 'Open the project folder`;
 * `Browse to the directory where you cloned the mobile-wallet repo and click OK`;
