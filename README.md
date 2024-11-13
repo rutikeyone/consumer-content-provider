@@ -1,7 +1,7 @@
 ![GitHub](https://img.shields.io/github/license/IgorVolochay/Face-recognition?style=flat-square&color=blue) &nbsp;
 ## Consumer-Content-Provider 
 
-## Description 
+## Description
 A mobile application demonstrating the receipt of data from a custom content provider for the Android operating system.
 <br>
 The application is built using clean architecture principles and follows a multi-module design approach.
